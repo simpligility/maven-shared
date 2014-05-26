@@ -27,22 +27,32 @@
     <relativePath>../maven-shared-components/pom.xml</relativePath>
   </parent>
 
+  <groupId>com.simpligility.org.apache.maven.shared</groupId>
   <artifactId>maven-dependency-tree</artifactId>
-  <version>2.2-SNAPSHOT</version>
+  <version>2.2-RC.1</version>
 
-  <name>Apache Maven Dependency Tree</name>
+  <name>Apache Maven Dependency Tree - simpligility fork</name>
   <description>A tree-based API for resolution of Maven project dependencies</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/shared/trunk/maven-dependency-tree/</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/shared/trunk/maven-dependency-tree/</developerConnection>
-    <url>http://svn.apache.org/viewvc/maven/shared/trunk/maven-dependency-tree/</url>
+    <connection>scm:git:git://github.com/simpligility/maven-shared</connection>
+    <developerConnection>scm:git:git@github.com:simpligility/maven-shared.git</developerConnection>
+    <url>http://github.com/simpligility/maven-shared/tree/simpligility</url>
   </scm>
+
   <issueManagement>
     <system>jira</system>
     <url>http://jira.codehaus.org/browse/MSHARED/component/13264</url>
   </issueManagement>
   <distributionManagement>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
     <site>
       <id>apache.website</id>
       <url>scm:svn:https://svn.apache.org/repos/infra/websites/production/maven/content/${maven.site.path}</url>
@@ -56,6 +66,12 @@
   <contributors>
     <contributor>
       <name>Tuomas Kiviaho</name>
+    </contributor>
+    <contributor>
+      <name>Manfred Moser</name>
+      <email>manfred@simpligility.com</email>
+      <organization>simpligility technologies inc.</organization>
+      <organizationUrl>http://www.simpligility.com</organizationUrl>
     </contributor>
   </contributors>
 
@@ -173,7 +189,7 @@
               These files contains the expected output of this component and can not contain a license header.
             -->
             <exclude>src/it/*/expected*.txt</exclude>
-          </excludes>            
+          </excludes>
         </configuration>
         <executions>
           <execution>
@@ -183,7 +199,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin>      
+      </plugin>
     </plugins>
   </build>
 
@@ -211,5 +227,70 @@
         </plugins>
       </reporting>
     </profile>
+
+    <profile>
+      <id>release</id>
+      <properties>
+        <!-- skipping tests and integration test for now -->
+        <maven.test.skip>true</maven.test.skip>
+        <invoker.skip>true</invoker.skip>
+      </properties>
+      <build>
+        <plugins>
+          <!-- We want to sign the artifact, the POM, and all attached artifacts -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <configuration>
+              <encoding>${project.build.sourceEncoding}</encoding>
+            </configuration>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <version>1.6.2</version>
+            <extensions>true</extensions>
+            <inherited>false</inherited>
+            <configuration>
+              <serverId>ossrh</serverId>
+              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+
   </profiles>
 </project>
